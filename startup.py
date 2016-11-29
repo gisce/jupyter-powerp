@@ -2,6 +2,8 @@ import sys
 import logging
 import os
 import osconf
+import time
+
 
 required_vars = ['user', 'password']
 config = osconf.config_from_environment('OPENERP', required_vars)
@@ -17,9 +19,8 @@ if 'OPENERP_DB_NAME' not in os.environ:
     logger.error('OPENERP_DB_NAME variable not set')
     print('OPENERP_DB_NAME variable not set')
 
-from backend import OpenERPService
-from backend import PoolWrapper
-
+from ooservice import OpenERPService
+from ooservice import PoolWrapper
 
 logging.basicConfig(level=logging.INFO)
 
