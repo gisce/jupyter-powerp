@@ -22,6 +22,7 @@ class OpenERPService(object):
             tools.config[key] = value
         tools.config.parse()
         from tools import config as default_config
+        print("Default config: {}".format(default_config))
         for key, value in config.iteritems():
             default_config[key] = value
         # Disable cron
@@ -152,16 +153,21 @@ class ModelWrapper(object):
         self.model = model
         self.dbname = dbname
         self.uid = uid
+        self.txn = Transaction().start(self.dbname, user=self.uid)
 
     def __getattr__(self, item):
         base = getattr(self.model, item)
         if callable(base):
             def wrapper(*args):
-                with Transaction().start(self.dbname, user=self.uid) as txn:
-                    newargs = (txn.cursor, txn.user) + args
-                    res = base(*newargs)
-                    txn.cursor.commit()
-                    return res
+                newargs = (self.txn.cursor, self.txn.user) + args
+                res = base(*newargs)
+                self.txn.cursor.commit()
+                return res
             return wrapper
         else:
             return base
+
+    def __del__(self):
+        print("Cursor!: {}".format(self.txn.cursor))
+        if self.txn.cursor:
+            self.txn.stop()
