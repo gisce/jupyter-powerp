@@ -2,7 +2,6 @@ import sys
 import logging
 import os
 import osconf
-import time
 
 
 required_vars = ['user', 'password']
